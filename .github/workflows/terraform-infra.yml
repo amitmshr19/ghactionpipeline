@@ -13,7 +13,7 @@ permissions:
 jobs:
   terraform:
     name: Deploy Infra to Azure
-    runs-on: ubuntu-latest
+    runs-on: amitghrunner
     strategy:
       matrix:
         environment: [dev, stage, prod]
