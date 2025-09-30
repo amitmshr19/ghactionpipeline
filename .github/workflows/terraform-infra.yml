@@ -27,12 +27,12 @@ jobs:
 
       # Step 4: Terraform Plan
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -out=tfplan
 
 
       # Step 5: Terraform Apply (Auto)
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
-        run: terraform plan -out=tfplan
+        
 
     
