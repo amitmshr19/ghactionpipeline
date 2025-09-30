@@ -27,6 +27,8 @@ jobs:
 
       # Step 4: Terraform Plan
       - name: Terraform Plan
+        run: terraform plan
+
 
       # Step 5: Terraform Apply (Auto)
       - name: Terraform Apply
