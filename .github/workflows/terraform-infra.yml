@@ -8,7 +8,7 @@ on:
 
 jobs:
   terraform:
-    runs-on: ubuntu-latest
+    runs-on: amitghrunner
     defaults:
       run:
         working-directory: infra   # <-- yeh important hai
