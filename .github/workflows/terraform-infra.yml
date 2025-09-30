@@ -14,9 +14,6 @@ jobs:
         working-directory: infra   # <-- yeh important hai
 
     steps:
-      # Step 1: Checkout repo
-      - name: Checkout code
-        uses: actions/checkout@v3
 
       # Step 2: Setup Terraform
       - name: Setup Terraform
@@ -32,9 +29,4 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
-      # Step 5: Upload plan artifact
-      - name: Upload tfplan artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: tfplan-file
-          path: infra/tfplan
+    
