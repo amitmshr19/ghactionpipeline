@@ -1,1 +1,3 @@
-
+module "ghrg" {
+    source = "../module" 
+}
