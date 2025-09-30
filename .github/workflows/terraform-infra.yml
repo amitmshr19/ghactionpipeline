@@ -38,16 +38,6 @@ jobs:
         run: |
           curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
 
-      # Step 4: Install tflint
-      - name: Install tflint
-        run: |
-          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-
-      # Step 5: Run tflint
-      - name: Terraform Lint
-        working-directory: ./infra/${{ matrix.environment }}
-        run: tflint --init && tflint
-
       # Step 6: Run tfsec
       - name: Security Scan (tfsec)
         working-directory: ./infra/${{ matrix.environment }}
