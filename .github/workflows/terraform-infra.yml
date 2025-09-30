@@ -1,4 +1,4 @@
-name: Terraform Azure Infra Pipeline
+name: Terraform Init & Plan
 
 on:
   push:
@@ -6,76 +6,33 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   terraform:
-    name: Deploy Infra to Azure
-    runs-on: amitghrunner
-    strategy:
-      matrix:
-        environment: [dev, stage, prod]
-
-    environment:
-      name: ${{ matrix.environment }}
-      url: https://portal.azure.com/
-
+    runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout repo
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.6
+          terraform_version: 4.39.0
 
-      # Step 3: Install tfsec
-      - name: Install tfsec
-        run: |
-          curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
-
-      # Step 6: Run tfsec
-      - name: Security Scan (tfsec)
-        working-directory: ./infra/${{ matrix.environment }}
-        run: tfsec .
-
-      # Step 7: Azure Login
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      # Step 8: Terraform Init
       - name: Terraform Init
-        working-directory: ./infra/${{ matrix.environment }}
-        run: terraform init -backend-config="key=${{ matrix.environment }}.tfstate"
+        working-directory: ./infra
+        run: |
+          # अगर remote backend के लिए backend-config चाहिए तो नीचे वाली लाइन uncomment करके secrets use कर लो
+          # terraform init -backend-config="storage_account_name=${{ secrets.TF_BACKEND_STORAGE_ACCOUNT }}" -backend-config="container_name=${{ secrets.TF_BACKEND_CONTAINER }}" -backend-config="key=env.tfstate"
+          terraform init
 
-      # Step 9: Terraform Plan
       - name: Terraform Plan
         id: plan
-        working-directory: ./infra/${{ matrix.environment }}
-        run: terraform plan -out=tfplan
+        working-directory: ./infra
+        run: |
+          terraform plan -out=tfplan
 
-      # Step 10: Upload Plan as Artifact
-      - name: Upload Plan
+      - name: Upload tfplan artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tfplan-${{ matrix.environment }}
-          path: ./infra/${{ matrix.environment }}/tfplan
-
-      # Step 11: Manual Approval (via GitHub Environments)
-      # -> This happens automatically because we linked "environment" above
-      # -> You need to configure approval rules in GitHub Environment settings
-
-      # Step 12: Terraform Apply (only after approval)
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
-        working-directory: ./infra/${{ matrix.environment }}
-        run: terraform apply -auto-approve tfplan
-
+          name: tfplan
+          path: ./infra/tfplan
