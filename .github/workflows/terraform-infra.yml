@@ -1,38 +1,40 @@
-name: Terraform Init & Plan
+name: Terraform Plan
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
+  pull_request:
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    defaults:
+      run:
+        working-directory: infra   # <-- yeh important hai
 
+    steps:
+      # Step 1: Checkout repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.9.8
+          terraform_version: 1.9.5   # latest stable
 
+      # Step 3: Terraform Init
       - name: Terraform Init
-        working-directory: ./infra
-        run: |
-          # अगर remote backend के लिए backend-config चाहिए तो नीचे वाली लाइन uncomment करके secrets use कर लो
-          # terraform init -backend-config="storage_account_name=${{ secrets.TF_BACKEND_STORAGE_ACCOUNT }}" -backend-config="container_name=${{ secrets.TF_BACKEND_CONTAINER }}" -backend-config="key=env.tfstate"
-          terraform init
+        run: terraform init
 
+      # Step 4: Terraform Plan
       - name: Terraform Plan
-        id: plan
-        working-directory: ./infra
-        run: |
-          terraform plan -out=tfplan
+        run: terraform plan -out=tfplan
 
+      # Step 5: Upload plan artifact
       - name: Upload tfplan artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: tfplan
-          path: ./infra/tfplan
+          name: tfplan-file
+          path: infra/tfplan
