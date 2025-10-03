@@ -1,27 +1,26 @@
-name: Terraform Deploy
+name: Terraform Deploy via OIDC
 
 on:
   push:
     branches:
-      - main   # 👈 main branch पर push होते ही ये pipeline trigger होगी
+      - main  # main branch पर push होते ही pipeline चलेगी
 
 permissions:
-  id-token: write      # 👈 OIDC login के लिए जरूरी
+  id-token: write      # OIDC token generate करने के लिए
   contents: read
 
 jobs:
   terraform-deploy:
-    runs-on: amitghrunner   # 👈 आपका self-hosted runner
+    runs-on: amitghrunner   # आपका self-hosted runner
 
     defaults:
       run:
-        working-directory: infra   # 👈 जहां आपके Terraform files रखे हैं (e.g. infra/, environments/dev/)
+        working-directory: infra  # 👈 Terraform files वाला folder
 
     env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_CLIENT_ID: 70181517-a3a7-4ebf-97cc-b0c50b64220f
+      ARM_TENANT_ID: d0bf57fc-449e-4bf0-b0b7-c406b233a1a6
+      ARM_SUBSCRIPTION_ID: d9291a0a-9274-4334-a1b7-210c7a5eb2c6
 
     steps:
       - name: 🧾 Checkout Code
@@ -32,17 +31,13 @@ jobs:
         with:
           terraform_version: 1.13.3
 
-      - name: 🔐 Azure Login (OIDC)
+      - name: 🔐 Azure Login via OIDC
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: 📂 Debug - Check Directory (optional)
-        run: |
-          pwd
-          ls -la
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+          federated-token: true   # ✅ OIDC federation enable
 
       - name: 🌱 Terraform Init
         run: terraform init
