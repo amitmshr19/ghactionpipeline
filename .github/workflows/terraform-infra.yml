@@ -42,7 +42,7 @@ jobs:
 
       # Step 4: Terraform Plan
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
+        run: terraform plan 
   terraform-apply:
       runs-on: amitghrunner
       needs: terraform-job   # depends on the first job
