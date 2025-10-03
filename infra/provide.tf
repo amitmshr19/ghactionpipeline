@@ -3,7 +3,7 @@ terraform {
     resource_group_name   = "rgsep"
     storage_account_name  = "sasepbackend"
     container_name        = "amitcontainer"
-    key                   = "terraform.tfstate"
+    key                   = "terraf.tfstate"
     use_azuread_auth     = true
   }
 }                            ##for # ctrl+/
