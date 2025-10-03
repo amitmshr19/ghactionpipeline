@@ -45,7 +45,7 @@ jobs:
         run: terraform plan -out=tfplan
   terraform-apply:
       runs-on: amitghrunner
-      needs: terraform-init-plan
+      needs: terraform-job   # depends on the first job
       environment: dev    #evs set karne se manual validation wala task aise auto set ho jata hai not need to add extra in step as azure pl
       steps:
          # Step 1: Checkout
