@@ -1,11 +1,15 @@
 name: Terraform Plan
 
 on:
-  push:
+#workflow_dispatch used for maunal run work flow everytime if use push to main brach tha auto run
+  push:         
     branches:
       - main
   pull_request:
-
+permissions:
+    id-token: write
+    contents: read
+      
 jobs:
   terraform-job:
     runs-on: amitghrunner
@@ -14,15 +18,23 @@ jobs:
         working-directory: infra   # <-- yeh important hai
 
     steps:
-      # Step 1: Setup Terraform
+      # Step 1: Checkout
       - name: Checkout
         uses: actions/checkout@v5.0.0
          
-      # Step 2: Setup Terraform
-      - name: Setup Terraform
+      # Step 2: Terraform Install
+      - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.9.5   # latest stable
+          terraform_version: 1.13.5   # latest stable
+      - name: Azure Login
+        uses: Azure/login@v2.3.0
+        with:
+          # TenantId of the Azure Service principal created.
+          client-id:
+          tenant-id: 
+          subscription-id: 
+    
 
       # Step 3: Terraform Init
       - name: Terraform Init
@@ -31,11 +43,33 @@ jobs:
       # Step 4: Terraform Plan
       - name: Terraform Plan
         run: terraform plan -out=tfplan
-
-
-      # Step 5: Terraform Apply (Auto)
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
-        
+Jobs:
+  terraform-apply:
+    runs-on:
+    needs: terraform-init-plan
+    environment: dev    #evs set karne se manual validation wala task aise auto set ho jata hai not need to add extra in step as azure pl
+    steps:
+       # Step 1: Checkout
+        - name: Checkout
+          uses: actions/checkout@v5.0.0
+           
+        # Step 2: AZ Login
+        - name: Azure Login
+          uses: Azure/login@v2.3.0
+          with:
+            # TenantId of the Azure Service principal created.
+            client-id:
+            tenant-id: 
+            subscription-id: 
+  
+        # Step 3: Terraform Init
+        - name: Terraform Init
+          run: terraform init
+  
+        # Step 4: Terraform Apply
+        - name: Terraform Apply
+          run: terraform apply -out=tfplan
+  
+          
 
     
