@@ -30,10 +30,10 @@ jobs:
       - name: Azure Login
         uses: Azure/login@v2.3.0
         with:
-          # TenantId of the Azure Service principal created.
-          client-id:
-          tenant-id: 
-          subscription-id: 
+          # TenantId of the Azure Service principal created.secret bhi bana sakte ho 
+          client-id: 70181517-a3a7-4ebf-97cc-b0c50b64220f
+          tenant-id: d0bf57fc-449e-4bf0-b0b7-c406b233a1a6
+          subscription-id: d9291a0a-9274-4334-a1b7-210c7a5eb2c6
     
 
       # Step 3: Terraform Init
@@ -43,32 +43,32 @@ jobs:
       # Step 4: Terraform Plan
       - name: Terraform Plan
         run: terraform plan -out=tfplan
-Jobs:
-  terraform-apply:
-    runs-on:
-    needs: terraform-init-plan
-    environment: dev    #evs set karne se manual validation wala task aise auto set ho jata hai not need to add extra in step as azure pl
-    steps:
-       # Step 1: Checkout
-        - name: Checkout
-          uses: actions/checkout@v5.0.0
-           
-        # Step 2: AZ Login
-        - name: Azure Login
-          uses: Azure/login@v2.3.0
-          with:
-            # TenantId of the Azure Service principal created.
-            client-id:
-            tenant-id: 
-            subscription-id: 
-  
-        # Step 3: Terraform Init
-        - name: Terraform Init
-          run: terraform init
-  
-        # Step 4: Terraform Apply
-        - name: Terraform Apply
-          run: terraform apply -out=tfplan
+  Job:
+    terraform-apply:
+      runs-on:
+      needs: terraform-init-plan
+      environment: dev    #evs set karne se manual validation wala task aise auto set ho jata hai not need to add extra in step as azure pl
+      steps:
+         # Step 1: Checkout
+          - name: Checkout
+            uses: actions/checkout@v5.0.0
+             
+          # Step 2: AZ Login
+          - name: Azure Login
+            uses: Azure/login@v2.3.0
+            with:
+              # TenantId of the Azure Service principal created.
+              client-id: 70181517-a3a7-4ebf-97cc-b0c50b64220f
+              tenant-id: d0bf57fc-449e-4bf0-b0b7-c406b233a1a6
+              subscription-id: d0bf57fc-449e-4bf0-b0b7-c406b233a1a6
+    
+          # Step 3: Terraform Init
+          - name: Terraform Init
+            run: terraform init
+    
+          # Step 4: Terraform Apply
+          - name: Terraform Apply
+            run: terraform apply -out=tfplan
   
           
 
