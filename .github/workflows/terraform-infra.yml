@@ -1,51 +1,56 @@
-name: 🚀 Terraform Infra Pipeline
+name: Terraform Deploy
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
-  id-token: write
+  id-token: write    # ✅ OIDC के लिए जरूरी
   contents: read
 
 jobs:
-  terraform:
-    name: 🌍 Terraform Deploy
-    runs-on: [self-hosted, amitghrunner]   # 👈 Self-hosted runner
+  terraform-deploy:
+    name: 🌐 Terraform Init → Plan → Apply
+    runs-on: amitghrunner     # 🟡 तुम्हारा self-hosted runner
 
     defaults:
       run:
-        working-directory: infra   # 👈 important (infra folder me tf files hain)
+        working-directory: infra   # 📝 तुम्हारे repo में infra folder है
+
+    env:
+      ARM_CLIENT_ID: 70181517-a3a7-4ebf-97cc-b0c50b64220f
+      ARM_TENANT_ID: d0bf57fc-449e-4bf0-b0b7-c406b233a1a6
+      ARM_SUBSCRIPTION_ID: d9291a0a-9274-4334-a1b7-210c7a5eb2c6
 
     steps:
-      - name: 🧰 Checkout Code
-        uses: actions/checkout@v3
+      # Step 1: Checkout Repo
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
 
-      - name: 🔐 Azure Login using OIDC
+      # Step 2: Setup Terraform
+      - name: 🧰 Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.3
+
+      # Step 3: Azure Login via OIDC (no client secret required ✅)
+      - name: 🔐 Azure Login via OIDC
         uses: azure/login@v2
         with:
           client-id: ${{ env.ARM_CLIENT_ID }}
           tenant-id: ${{ env.ARM_TENANT_ID }}
           subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
 
-      - name: 🌱 Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.8.5   # ya jo version tu use karta hai
+      # Step 4: Terraform Init
+      - name: 🌱 Terraform Init
+        run: terraform init
 
-      - name: 🏗️ Terraform Init
-        run: terraform init -no-color
+      # Step 5: Terraform Plan
+      - name: 📝 Terraform Plan
+        run: terraform plan
 
-      - name: 📝 Terraform Validate
-        run: terraform validate -no-color
-
-      - name: 📊 Terraform Plan
-        run: terraform plan -no-color
-
+      # Step 6: Terraform Apply (auto approve)
       - name: 🚀 Terraform Apply
-        if: github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve -no-color
+        run: terraform apply -auto-approve
