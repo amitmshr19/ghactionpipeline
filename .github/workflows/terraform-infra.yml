@@ -15,7 +15,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: infra  # 👈 Terraform files वाला folder
+        working-directory: infra/main.tf  # 👈 Terraform files वाला folder 
 
     env:
       ARM_CLIENT_ID: 70181517-a3a7-4ebf-97cc-b0c50b64220f
@@ -41,6 +41,9 @@ jobs:
 
       - name: 🌱 Terraform Init
         run: terraform init
+        defaults:
+          run:
+          working-directory: infra/main.tf  # 👈 Terraform files वाला folder 
 
       - name: 📝 Terraform Plan
         run: terraform plan -out=tfplan
