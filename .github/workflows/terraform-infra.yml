@@ -13,16 +13,16 @@ permissions:
 jobs:
   terraform-deploy:
     name: 🌐 Terraform Init → Plan → Apply
-    runs-on: amitghrunner     # 🟡 तुम्हारा self-hosted runner
+    runs-on: amitghrunner       # 🟡 तुम्हारा self-hosted runner
 
     defaults:
       run:
-        working-directory: infra   # 📝 तुम्हारे repo में infra folder है
+        working-directory: infra   # 👉 terraform files infra folder में हैं
 
     env:
-      ARM_CLIENT_ID: 70181517-a3a7-4ebf-97cc-b0c50b64220f
-      ARM_TENANT_ID: d0bf57fc-449e-4bf0-b0b7-c406b233a1a6
-      ARM_SUBSCRIPTION_ID: d9291a0a-9274-4334-a1b7-210c7a5eb2c6
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     steps:
       # Step 1: Checkout Repo
@@ -35,8 +35,8 @@ jobs:
         with:
           terraform_version: 1.13.3
 
-      # Step 3: Azure Login via OIDC (no client secret required ✅)
-      - name: 🔐 Azure Login via OIDC
+      # Step 3: Azure Login (via OIDC - no secret required)
+      - name: 🔐 Azure Login
         uses: azure/login@v2
         with:
           client-id: ${{ env.ARM_CLIENT_ID }}
@@ -51,6 +51,6 @@ jobs:
       - name: 📝 Terraform Plan
         run: terraform plan
 
-      # Step 6: Terraform Apply (auto approve)
+      # Step 6: Terraform Apply
       - name: 🚀 Terraform Apply
         run: terraform apply -auto-approve
